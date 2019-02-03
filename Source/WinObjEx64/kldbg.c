@@ -4,9 +4,9 @@
 *
 *  TITLE:       KLDBG.C, based on KDSubmarine by Evilcry
 *
-*  VERSION:     1.71
+*  VERSION:     1.72
 *
-*  DATE:        19 Jan 2019
+*  DATE:        03 Feb 2019
 *
 *  MINIMUM SUPPORTED OS WINDOWS 7
 *
@@ -2884,8 +2884,9 @@ ULONG_PTR KdFindCiCallbacks(
 
     ULONG_PTR Address = 0, Result = 0;
 
-    PBYTE   Signature = NULL, ptrCode = NULL, MatchingPattern = NULL;
-    ULONG   SignatureSize = 0;
+    PBYTE   Signature = NULL, ptrCode = NULL, InstructionMatchPattern = NULL;
+    ULONG   SignatureSize = 0, InstructionMatchLength;
+    ULONG	InstructionExactMatchLength;
 
     PVOID   SectionBase;
     ULONG   SectionSize = 0, Index;
@@ -2909,51 +2910,54 @@ ULONG_PTR KdFindCiCallbacks(
         if ((SectionBase == 0) || (SectionSize == 0))
             break;
 
-        MatchingPattern = SeCiCallbacksMatchingPattern; //default matching pattern
+        InstructionMatchPattern = SeCiCallbacksMatchingPattern; //default matching pattern
+        InstructionMatchLength = 7; //lea
+        InstructionExactMatchLength = RTL_NUMBER_OF(SeCiCallbacksMatchingPattern);
 
         switch (g_NtBuildNumber) {
 
         case 7601:
             Signature = g_CiCallbacksPattern_7601;
             SignatureSize = sizeof(g_CiCallbacksPattern_7601);
-            MatchingPattern = g_CiCallbacksMatchingPattern;
+            InstructionMatchPattern = g_CiCallbacksMatchingPattern;
+            InstructionExactMatchLength = RTL_NUMBER_OF(g_CiCallbacksMatchingPattern);
             break;
 
         case 9200:
         case 9600:
             Signature = SeCiCallbacksPattern_9200_9600;
             SignatureSize = sizeof(SeCiCallbacksPattern_9200_9600);
-            MatchingPattern = SeCiCallbacksMatchingPattern;
             break;
 
         case 10240:
         case 10586:
             Signature = SeCiCallbacksPattern_10240_10586;
             SignatureSize = sizeof(SeCiCallbacksPattern_10240_10586);
-            MatchingPattern = SeCiCallbacksMatchingPattern;
             break;
 
         case 14393:
             Signature = SeCiCallbacksPattern_14393;
             SignatureSize = sizeof(SeCiCallbacksPattern_14393);
-            MatchingPattern = SeCiCallbacksMatchingPattern;
             break;
 
         case 15063:
         case 16299:
             Signature = SeCiCallbacksPattern_15063_16299;
             SignatureSize = sizeof(SeCiCallbacksPattern_15063_16299);
-            MatchingPattern = SeCiCallbacksMatchingPattern;
             break;
 
         case 17134:
         case 17763:
             Signature = SeCiCallbacksPattern_17134_17763;
             SignatureSize = sizeof(SeCiCallbacksPattern_17134_17763);
-            MatchingPattern = SeCiCallbacksMatchingPattern;
             break;
 
         default:
+            Signature = SeCiCallbacksPattern_19H1;
+            SignatureSize = sizeof(SeCiCallbacksPattern_19H1);
+            InstructionMatchPattern = SeCiCallbacksMatchingPattern_19H1;
+            InstructionMatchLength = 10; //mov
+            InstructionExactMatchLength = RTL_NUMBER_OF(SeCiCallbacksMatchingPattern_19H1);
             break;
         }
 
@@ -2994,14 +2998,18 @@ ULONG_PTR KdFindCiCallbacks(
                 break;
             //
             // mov cs:g_CiCallbacks, rax (for Windows 7)
-            // lea rcx, SeCiCallbacks (for everything else)
+            // lea rcx, SeCiCallbacks (for 8/10 TH/RS)
+            // mov cs:SeCiCallbacks (19H1)
             //
-            if (hs.len == 7) {
-                if ((ptrCode[Index] == MatchingPattern[0]) &&
-                    (ptrCode[Index + 1] == MatchingPattern[1]) &&
-                    (ptrCode[Index + 2] == MatchingPattern[2]))
+            if (hs.len == InstructionMatchLength) {
+
+                //
+                // Match block found.
+                //
+                if (RtlCompareMemory((VOID*)&ptrCode[Index], (VOID*)InstructionMatchPattern,
+                    InstructionExactMatchLength) == InstructionExactMatchLength)
                 {
-                    Rel = *(PLONG)(ptrCode + Index + 3);
+                    Rel = *(PLONG)(ptrCode + Index + InstructionExactMatchLength);
                     break;
                 }
             }

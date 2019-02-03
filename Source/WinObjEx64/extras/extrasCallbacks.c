@@ -4,9 +4,9 @@
 *
 *  TITLE:       EXTRASCALLBACKS.C
 *
-*  VERSION:     1.71
+*  VERSION:     1.72
 *
-*  DATE:        26 Jan 2019
+*  DATE:        03 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -271,12 +271,10 @@ LPWSTR GetCiRoutineNameFromIndex(
 
     case 17134:
     case 17763:
+    default:
         Indexes = CiCallbackIndexes_Win10RS4_RS5;
         ArrayCount = CI_CALLBACK_NAMES_W10RS4_RS5_COUNT;
         break;
-
-    default:
-        return T_Unknown;
     }
 
     if (Index >= ArrayCount)
