@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        03 Feb 2019
+*  DATE:        04 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -189,7 +189,7 @@ static const BYTE CiCallbackIndexes_Win10RS3[CI_CALLBACK_NAMES_W10RS3_COUNT] = {
 };
 
 #define CI_CALLBACK_NAMES_W10RS4_RS5_COUNT 24
-static const BYTE CiCallbackIndexes_Win10RS4_RS5[CI_CALLBACK_NAMES_W10RS4_RS5_COUNT] = { //Windows 10 RS4/RS5
+static const BYTE CiCallbackIndexes_Win10RS4_RS5[CI_CALLBACK_NAMES_W10RS4_RS5_COUNT] = { //Windows 10 RS4/RS5/19H1
     0,  //CiSetFileCache
     1,  //CiGetFileCache
     2,  //CiQueryInformation

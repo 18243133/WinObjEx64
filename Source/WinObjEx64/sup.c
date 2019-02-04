@@ -4,9 +4,9 @@
 *
 *  TITLE:       SUP.C
 *
-*  VERSION:     1.71
+*  VERSION:     1.72
 *
-*  DATE:        01 Feb 2019
+*  DATE:        04 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -3479,7 +3479,6 @@ PSID supQueryProcessSid(
 {
     HANDLE hProcessToken = NULL;
     PSID result = NULL;
-
 
     if (NT_SUCCESS(NtOpenProcessToken(hProcess, TOKEN_QUERY, &hProcessToken))) {
 

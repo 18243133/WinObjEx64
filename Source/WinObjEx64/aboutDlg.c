@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2015 - 2018
+*  (C) COPYRIGHT AUTHORS, 2015 - 2019
 *
 *  TITLE:       ABOUTDLG.C
 *
-*  VERSION:     1.70
+*  VERSION:     1.72
 *
-*  DATE:        03 Dec 2018
+*  DATE:        03 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -144,8 +144,22 @@ VOID AboutDialogInit(
 VOID AboutDialogCollectGlobals(
     _In_ LPWSTR lpDestBuffer)
 {
-    _strcpy(lpDestBuffer, TEXT("EnableExperimentalFeatures: "));
+    wsprintf(lpDestBuffer, TEXT("Winver: %u.%u.%u"),
+        g_WinObj.osver.dwMajorVersion,
+        g_WinObj.osver.dwMinorVersion,
+        g_WinObj.osver.dwBuildNumber);
+
+    _strcat(lpDestBuffer, TEXT("\r\n"));
+
+    _strcat(lpDestBuffer, TEXT("EnableExperimentalFeatures: "));
     ultostr(g_WinObj.EnableExperimentalFeatures, _strend(lpDestBuffer));
+    _strcat(lpDestBuffer, TEXT("\r\n"));
+
+    _strcat(lpDestBuffer, TEXT("drvOpenLoadStatus: "));
+    ultostr(g_kdctx.drvOpenLoadStatus, _strend(lpDestBuffer));
+    if (g_kdctx.drvOpenLoadStatus == 0) {
+        _strcat(lpDestBuffer, TEXT(" (reported as OK)"));
+    }
     _strcat(lpDestBuffer, TEXT("\r\n"));
 
     _strcat(lpDestBuffer, TEXT("IsFullAdmin: "));

@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        03 Feb 2019
+*  DATE:        04 Feb 2019
 *
 *  MINIMUM SUPPORTED OS WINDOWS 7
 *
@@ -2831,7 +2831,7 @@ VOID kdInit(
         //
         // Try to open existing device.
         //
-        if (scmOpenDevice(KLDBGDRV, &g_kdctx.hDevice) == FALSE) {
+        if (scmOpenDevice(KLDBGDRV, &g_kdctx.hDevice, &g_kdctx.drvOpenLoadStatus) == FALSE) {
 
             //
             // No such device exist, construct filepath and check if driver already present.
@@ -2850,7 +2850,8 @@ VOID kdInit(
             //
             // Load service driver and open handle for it.
             //
-            g_kdctx.IsOurLoad = scmLoadDeviceDriver(KLDBGDRV, szDrvPath, &g_kdctx.hDevice);
+            g_kdctx.drvOpenLoadStatus = ERROR_SUCCESS;
+            g_kdctx.IsOurLoad = scmLoadDeviceDriver(KLDBGDRV, szDrvPath, &g_kdctx.hDevice, &g_kdctx.drvOpenLoadStatus);
         }
 
     }
@@ -3063,7 +3064,7 @@ VOID kdShutdown(
     // Windbg recreates service and drops file everytime when kernel debug starts.
     //
     if (g_kdctx.IsOurLoad) {
-        scmUnloadDeviceDriver(KLDBGDRV);
+        scmUnloadDeviceDriver(KLDBGDRV, NULL);
 
         //
         // Driver file is no longer needed.

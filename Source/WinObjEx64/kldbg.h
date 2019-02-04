@@ -83,6 +83,9 @@ typedef struct _KLDBGCONTEXT {
     //ntoskrnl mapped image
     PVOID NtOsImageMap;
 
+    //win32 error value from SCM
+    ULONG drvOpenLoadStatus;
+
     //syscall tables related info
     ULONG KiServiceLimit;
     ULONG W32pServiceLimit;
