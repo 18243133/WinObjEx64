@@ -4,9 +4,9 @@
 *
 *  TITLE:       PROPDLG.C
 *
-*  VERSION:     1.71
+*  VERSION:     1.72
 *
-*  DATE:        01 Feb 2019
+*  DATE:        05 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -598,6 +598,7 @@ VOID propCreateDialog(
         case ObjectTypeFltConnPort:
         case ObjectTypeType:
         case ObjectTypeCallback:
+        case ObjectTypeSymbolicLink:
             RtlSecureZeroMemory(&Page, sizeof(Page));
             Page.dwSize = sizeof(PROPSHEETPAGE);
             Page.dwFlags = PSP_DEFAULT | PSP_USETITLE;

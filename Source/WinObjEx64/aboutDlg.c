@@ -123,6 +123,7 @@ VOID AboutDialogInit(
             if (supQuerySecureBootState(&bSecureBoot)) {
                 wsprintf(_strend(szBuffer), TEXT(" with%ws SecureBoot"), (bSecureBoot == TRUE) ? TEXT("") : TEXT("out"));
             }
+            g_kdctx.IsSecureBoot = bSecureBoot;
         }
     }
     else {
@@ -149,6 +150,10 @@ VOID AboutDialogCollectGlobals(
         g_WinObj.osver.dwMinorVersion,
         g_WinObj.osver.dwBuildNumber);
 
+    _strcat(lpDestBuffer, TEXT("\r\n"));
+
+    _strcat(lpDestBuffer, TEXT("IsSecureBoot: "));
+    ultostr(g_kdctx.IsSecureBoot, _strend(lpDestBuffer));
     _strcat(lpDestBuffer, TEXT("\r\n"));
 
     _strcat(lpDestBuffer, TEXT("EnableExperimentalFeatures: "));

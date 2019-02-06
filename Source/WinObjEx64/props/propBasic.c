@@ -4,9 +4,9 @@
 *
 *  TITLE:       PROPBASIC.C
 *
-*  VERSION:     1.71
+*  VERSION:     1.72
 *
-*  DATE:        26 Jan 2019
+*  DATE:        04 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -576,7 +576,7 @@ VOID propBasicQuerySymlink(
             SystemTime.Minute,
             SystemTime.Second,
             SystemTime.Day,
-            Months[SystemTime.Month - 1],
+            g_szMonths[SystemTime.Month - 1],
             SystemTime.Year);
 
         SetDlgItemText(hwndDlg, ID_OBJECT_SYMLINK_CREATION, szBuffer);
@@ -665,7 +665,7 @@ VOID propBasicQueryKey(
             SystemTime.Minute,
             SystemTime.Second,
             SystemTime.Day,
-            Months[SystemTime.Month - 1],
+            g_szMonths[SystemTime.Month - 1],
             SystemTime.Year);
 
         SetDlgItemText(hwndDlg, ID_KEYLASTWRITE, szBuffer);

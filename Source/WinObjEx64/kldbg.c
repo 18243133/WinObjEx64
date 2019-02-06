@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        04 Feb 2019
+*  DATE:        05 Feb 2019
 *
 *  MINIMUM SUPPORTED OS WINDOWS 7
 *
@@ -435,6 +435,50 @@ NTSTATUS ObEnumerateBoundaryDescriptorEntries(
 }
 
 /*
+* ObpDumpObjectWithSpecifiedSize
+*
+* Purpose:
+*
+* Return dumped object version aware.
+*
+* Use supVirtualFree to free returned buffer.
+*
+*/
+_Success_(return != NULL)
+PVOID ObpDumpObjectWithSpecifiedSize(
+    _In_ ULONG_PTR ObjectAddress,
+    _In_ ULONG ObjectSize,
+    _In_ ULONG ObjectVersion,
+    _Out_ PULONG ReadSize,
+    _Out_ PULONG ReadVersion
+)
+{
+    PVOID ObjectBuffer = NULL;
+    ULONG BufferSize = ALIGN_UP_BY(ObjectSize, PAGE_SIZE);
+
+    ObjectBuffer = supVirtualAlloc(BufferSize);
+    if (ObjectBuffer == NULL) {
+        return NULL;
+    }
+
+    if (!kdReadSystemMemory(
+        ObjectAddress,
+        ObjectBuffer,
+        (ULONG)ObjectSize))
+    {
+        supVirtualFree(ObjectBuffer);
+        return NULL;
+    }
+
+    if (ReadSize)
+        *ReadSize = ObjectSize;
+    if (ReadVersion)
+        *ReadVersion = ObjectVersion;
+
+    return ObjectBuffer;
+}
+
+/*
 * ObDumpObjectTypeVersionAware
 *
 * Purpose:
@@ -444,16 +488,18 @@ NTSTATUS ObEnumerateBoundaryDescriptorEntries(
 * Use supVirtualFree to free returned buffer.
 *
 */
-_Success_(return != NULL)
 PVOID ObDumpObjectTypeVersionAware(
     _In_ ULONG_PTR ObjectAddress,
     _Out_ PULONG Size,
     _Out_ PULONG Version
 )
 {
-    PVOID ObjectBuffer = NULL;
-    ULONG ObjectSize = 0, BufferSize = 0;
+    ULONG ObjectSize = 0;
     ULONG ObjectVersion = 0;
+
+    //assume failure
+    if (Size) *Size = 0;
+    if (Version) *Version = 0;
 
     switch (g_NtBuildNumber) {
     case 7600:
@@ -478,28 +524,11 @@ PVOID ObDumpObjectTypeVersionAware(
         break;
     }
 
-    BufferSize = ALIGN_UP_BY(ObjectSize, PAGE_SIZE);
-    ObjectBuffer = supVirtualAlloc(BufferSize);
-    if (ObjectBuffer == NULL) {
-        return NULL;
-    }
-
-    if (!kdReadSystemMemory(
-        ObjectAddress,
-        ObjectBuffer,
-        (ULONG)ObjectSize))
-    {
-        supVirtualFree(ObjectBuffer);
-        return NULL;
-    }
-
-    if (Size)
-        *Size = ObjectSize;
-
-    if (Version)
-        *Version = ObjectVersion;
-
-    return ObjectBuffer;
+    return ObpDumpObjectWithSpecifiedSize(ObjectAddress,
+        ObjectSize,
+        ObjectVersion,
+        Size,
+        Version);
 }
 
 /*
@@ -512,16 +541,18 @@ PVOID ObDumpObjectTypeVersionAware(
 * Use supVirtualFree to free returned buffer.
 *
 */
-_Success_(return != NULL)
 PVOID ObDumpAlpcPortObjectVersionAware(
     _In_ ULONG_PTR ObjectAddress,
     _Out_ PULONG Size,
     _Out_ PULONG Version
 )
 {
-    PVOID ObjectBuffer = NULL;
-    ULONG ObjectSize = 0, BufferSize = 0;
+    ULONG ObjectSize = 0;
     ULONG ObjectVersion = 0;
+
+    //assume failure
+    if (Size) *Size = 0;
+    if (Version) *Version = 0;
 
     switch (g_NtBuildNumber) {
     case 7600:
@@ -543,42 +574,26 @@ PVOID ObDumpAlpcPortObjectVersionAware(
         break;
     }
 
-    BufferSize = ALIGN_UP_BY(ObjectSize, PAGE_SIZE);
-    ObjectBuffer = supVirtualAlloc(BufferSize);
-    if (ObjectBuffer == NULL) {
-        return NULL;
-    }
-
-    if (!kdReadSystemMemory(
-        ObjectAddress,
-        ObjectBuffer,
-        (ULONG)ObjectSize))
-    {
-        supVirtualFree(ObjectBuffer);
-        return NULL;
-    }
-
-    if (Size)
-        *Size = ObjectSize;
-
-    if (Version)
-        *Version = ObjectVersion;
-
-    return ObjectBuffer;
+    return ObpDumpObjectWithSpecifiedSize(ObjectAddress,
+        ObjectSize,
+        ObjectVersion,
+        Size,
+        Version);
 }
 
 /*
-* ObDumpDirectoryObjectVersionAware
+* ObxDumpDirectoryObjectVersionAware
 *
 * Purpose:
 *
 * Return dumped OBJECT_DIRECTORY object version aware.
 *
-* Use supHeapFree to free returned buffer.
+* Use supVirtualFree to free returned buffer.
+*
+* Note: Currently unused.
 *
 */
-_Success_(return != NULL)
-PVOID ObDumpDirectoryObjectVersionAware(
+PVOID ObxDumpDirectoryObjectVersionAware(
     _In_ ULONG_PTR ObjectAddress,
     _Out_ PULONG Size,
     _Out_ PULONG Version
@@ -586,7 +601,10 @@ PVOID ObDumpDirectoryObjectVersionAware(
 {
     ULONG ObjectVersion;
     ULONG ObjectSize = 0;
-    PVOID ObjectPtr;
+
+    //assume failure
+    if (Size) *Size = 0;
+    if (Version) *Version = 0;
 
     switch (g_NtBuildNumber) {
 
@@ -611,24 +629,64 @@ PVOID ObDumpDirectoryObjectVersionAware(
         break;
     }
 
-    ObjectPtr = supHeapAlloc(ObjectSize);
-    if (ObjectPtr == NULL)
-        return NULL;
-
-    if (!kdReadSystemMemoryEx(
-        ObjectAddress,
-        ObjectPtr,
+    return ObpDumpObjectWithSpecifiedSize(ObjectAddress,
         ObjectSize,
-        NULL))
-    {
-        supHeapFree(ObjectPtr);
-        return NULL;
+        ObjectVersion,
+        Size,
+        Version);
+}
+
+/*
+* ObDumpSymbolicLinkObjectVersionAware
+*
+* Purpose:
+*
+* Return dumped OBJEC_SYMBOLIC_LINK object version aware.
+*
+* Use supVirtualFree to free returned buffer.
+*
+*/
+PVOID ObDumpSymbolicLinkObjectVersionAware(
+    _In_ ULONG_PTR ObjectAddress,
+    _Out_ PULONG Size,
+    _Out_ PULONG Version
+)
+{
+    ULONG ObjectSize = 0;
+    ULONG ObjectVersion = 0;
+
+    //assume failure
+    if (Size) *Size = 0;
+    if (Version) *Version = 0;
+
+    switch (g_NtBuildNumber) {
+    case 7600:
+    case 7601:
+    case 9200:
+    case 9600:
+        ObjectSize = sizeof(OBJECT_SYMBOLIC_LINK_V1);
+        ObjectVersion = 1;
+        break;
+    case 10240:
+    case 10586:
+        ObjectSize = sizeof(OBJECT_SYMBOLIC_LINK_V2);
+        ObjectVersion = 2;
+        break;
+    case 14393:
+        ObjectSize = sizeof(OBJECT_SYMBOLIC_LINK_V3);
+        ObjectVersion = 3;
+        break;
+    default:
+        ObjectSize = sizeof(OBJECT_SYMBOLIC_LINK_V4);
+        ObjectVersion = 4;
+        break;
     }
 
-    *Version = ObjectVersion;
-    *Size = ObjectSize;
-
-    return ObjectPtr;
+    return ObpDumpObjectWithSpecifiedSize(ObjectAddress,
+        ObjectSize,
+        ObjectVersion,
+        Size,
+        Version);
 }
 
 /*

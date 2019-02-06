@@ -4,9 +4,9 @@
 *
 *  TITLE:       NTOS.H
 *
-*  VERSION:     1.100
+*  VERSION:     1.101
 *
-*  DATE:        26 Jan 2019
+*  DATE:        04 Feb 2019
 *
 *  Common header file for the ntos API functions and definitions.
 *
@@ -8632,6 +8632,41 @@ NtDeletePrivateNamespace(
 * Symbolic Link API.
 *
 ************************************************************************************/
+
+typedef struct _OBJECT_SYMBOLIC_LINK_V1 { //pre Win10 TH1
+    LARGE_INTEGER CreationTime;
+    UNICODE_STRING LinkTarget;
+    ULONG DosDeviceDriveIndex;
+} OBJECT_SYMBOLIC_LINK_V1, *POBJECT_SYMBOLIC_LINK_V1;
+
+typedef struct _OBJECT_SYMBOLIC_LINK_V2 { //Win10 TH1/TH2
+    LARGE_INTEGER CreationTime;
+    UNICODE_STRING LinkTarget;
+    ULONG DosDeviceDriveIndex;
+    ULONG Flags;
+} OBJECT_SYMBOLIC_LINK_V2, *POBJECT_SYMBOLIC_LINK_V2;
+
+typedef struct _OBJECT_SYMBOLIC_LINK_V3 { //Win10 RS1
+    LARGE_INTEGER CreationTime;
+    UNICODE_STRING LinkTarget;
+    ULONG DosDeviceDriveIndex;
+    ULONG Flags;
+    ULONG AccessMask;
+} OBJECT_SYMBOLIC_LINK_V3, *POBJECT_SYMBOLIC_LINK_V3;
+
+typedef struct _OBJECT_SYMBOLIC_LINK_V4 { //Win10 RS2+
+    LARGE_INTEGER CreationTime;
+    union {
+        UNICODE_STRING LinkTarget;
+        struct {
+            PVOID Callback;
+            PVOID CallbackContext;
+        };
+    } u1;
+    ULONG DosDeviceDriveIndex;
+    ULONG Flags;
+    ULONG AccessMask;
+} OBJECT_SYMBOLIC_LINK_V4, *POBJECT_SYMBOLIC_LINK_V4;
 
 NTSYSAPI
 NTSTATUS

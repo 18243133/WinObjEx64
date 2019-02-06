@@ -4,9 +4,9 @@
 *
 *  TITLE:       UI.H
 *
-*  VERSION:     1.71
+*  VERSION:     1.72
 *
-*  DATE:        19 Jan 2019
+*  DATE:        04 Feb 2019
 *
 *  Common header file for the user interface.
 *
@@ -33,7 +33,7 @@ typedef HWND(WINAPI *pfnHtmlHelpW)(
     _In_ DWORD_PTR dwData
     );
 
-#define PROGRAM_VERSION         L"1.7.1"
+#define PROGRAM_VERSION         L"1.7.2"
 #ifdef _USE_OWN_DRIVER
 #define PROGRAM_NAME            L"Windows Object Explorer 64-bit (Non-public version)"
 #else 
@@ -150,3 +150,19 @@ typedef struct _PROCEDURE_DESC {
 
 //props used by ipc dialogs
 #define T_IPCDLGCONTEXT TEXT("IpcDlgContext")
+
+//Calendar
+static LPCWSTR g_szMonths[12] = {
+    L"Jan",
+    L"Feb",
+    L"Mar",
+    L"Apr",
+    L"May",
+    L"Jun",
+    L"Jul",
+    L"Aug",
+    L"Sep",
+    L"Oct",
+    L"Nov",
+    L"Dec"
+};
