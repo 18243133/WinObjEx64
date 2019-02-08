@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2015 - 2018
+*  (C) COPYRIGHT AUTHORS, 2015 - 2019
 *
 *  TITLE:       PROPTYPE.C
 *
-*  VERSION:     1.70
+*  VERSION:     1.72
 *
-*  DATE:        28 Dec 2018
+*  DATE:        06 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -149,6 +149,7 @@ VOID propSetTypeDecodeValue(
         break;
 
     case ObjectTypeKey:
+    case ObjectTypeRegistryTransaction:
         Desc = a_KeyProp;
         Count = MAX_KNOWN_KEY_ATTRIBUTES;
         break;

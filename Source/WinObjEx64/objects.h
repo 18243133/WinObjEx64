@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2015 - 2018
+*  (C) COPYRIGHT AUTHORS, 2015 - 2019
 *
 *  TITLE:       OBJECTS.H
 *
-*  VERSION:     1.60
+*  VERSION:     1.72
 *
-*  DATE:        24 Oct 2018
+*  DATE:        06 Feb 2019
 *
 *  Header file for internal Windows object types handling.
 *
@@ -21,14 +21,14 @@
 //
 // Description Resource Id string table starting index
 //
-// Actual id = TYPE_DESCRIPTION_START_INDEX + TYPE_*
+// Actual id = TYPE_DESCRIPTION_START_INDEX + ObjectType*
 //
 #define TYPE_DESCRIPTION_START_INDEX    100
 
 //
-// Image Resource Id table starting index
+// Image Resource Id table starting index (for imagelist)
 //
-// Actual id = TYPE_RESOURCE_IMAGE_INDEX_START + ObjectType.ImageIndex
+// Actual id = ObjectType.ImageIndex - TYPE_RESOURCE_IMAGE_INDEX_START
 //
 #define TYPE_RESOURCE_IMAGE_INDEX_START 300
 
@@ -85,15 +85,19 @@ typedef enum _WOBJ_OBJECT_TYPE {
     ObjectTypeDxgkSharedSwapChain = 44,
     ObjectTypeDxgkSharedSyncObject = 45,
     ObjectTypeDxgkCurrentDxgProcessObject = 46,
-    ObjectTypeMemoryPartition = 47,
-    ObjectTypeUnknown = 48,
+    ObjectTypeDxgkDisplayManager = 47,
+    ObjectTypeDxgkSharedBundle = 48,
+    ObjectTypeDxgkSharedProtectedSession = 49,
+    ObjectTypeMemoryPartition = 50,
+    ObjectTypeRegistryTransaction = 51,
+    ObjectTypeUnknown = 52,
     ObjectTypeMax
 } WOBJ_OBJECT_TYPE;
 
 typedef struct _WOBJ_TYPE_DESC {
     LPWSTR Name;
     WOBJ_OBJECT_TYPE Index;
-    WOBJ_OBJECT_TYPE ImageIndex; //different object types may share same images (e.g. Dxgk*)
+    UINT ImageIndex; //individual image id for each object type (maybe the same for few objects)
 } WOBJ_TYPE_DESC, *PWOBJ_TYPE_DESC;
 
 //
@@ -102,59 +106,89 @@ typedef struct _WOBJ_TYPE_DESC {
 #define TYPE_FIRST ObjectTypeDevice
 #define TYPE_LAST ObjectTypeUnknown
 
-#define DIRECTX_SHARED_IMAGE_INDEX ObjectTypeDxgkSharedResource
-
 static const WOBJ_TYPE_DESC g_ObjectTypes[] = {
-    { L"Device", ObjectTypeDevice, ObjectTypeDevice },
-    { L"Driver", ObjectTypeDriver, ObjectTypeDriver },
-    { L"Section", ObjectTypeSection, ObjectTypeSection },
-    { L"ALPC Port", ObjectTypePort, ObjectTypePort },
-    { L"SymbolicLink", ObjectTypeSymbolicLink, ObjectTypeSymbolicLink },
-    { L"Key", ObjectTypeKey, ObjectTypeKey },
-    { L"Event", ObjectTypeEvent, ObjectTypeEvent },
-    { L"Job", ObjectTypeJob, ObjectTypeJob },
-    { L"Mutant", ObjectTypeMutant, ObjectTypeMutant },
-    { L"KeyedEvent", ObjectTypeKeyedEvent, ObjectTypeKeyedEvent },
-    { L"Type", ObjectTypeType, ObjectTypeType },
-    { L"Directory", ObjectTypeDirectory, ObjectTypeDirectory },
-    { L"WindowStation", ObjectTypeWinstation, ObjectTypeWinstation },
-    { L"Callback", ObjectTypeCallback, ObjectTypeCallback },
-    { L"Semaphore", ObjectTypeSemaphore, ObjectTypeSemaphore },
-    { L"WaitablePort", ObjectTypeWaitablePort, ObjectTypeWaitablePort },
-    { L"Timer", ObjectTypeTimer, ObjectTypeTimer },
-    { L"Session", ObjectTypeSession, ObjectTypeSession },
-    { L"Controller", ObjectTypeController, ObjectTypeController },
-    { L"Profile", ObjectTypeProfile, ObjectTypeProfile },
-    { L"EventPair", ObjectTypeEventPair, ObjectTypeEventPair },
-    { L"Desktop", ObjectTypeDesktop, ObjectTypeDesktop },
-    { L"File", ObjectTypeFile, ObjectTypeFile },
-    { L"WMIGuid", ObjectTypeWMIGuid, ObjectTypeWMIGuid },
-    { L"DebugObject", ObjectTypeDebugObject, ObjectTypeDebugObject },
-    { L"IoCompletion", ObjectTypeIoCompletion, ObjectTypeIoCompletion },
-    { L"Process", ObjectTypeProcess, ObjectTypeProcess },
-    { L"Adapter", ObjectTypeAdapter, ObjectTypeAdapter },
-    { L"Token", ObjectTypeToken, ObjectTypeToken },
-    { L"EtwRegistration", ObjectTypeETWRegistration, ObjectTypeETWRegistration },
-    { L"Thread", ObjectTypeThread, ObjectTypeThread },
-    { L"TmTx", ObjectTypeTmTx, ObjectTypeTmTx },
-    { L"TmTm", ObjectTypeTmTm, ObjectTypeTmTm },
-    { L"TmRm", ObjectTypeTmRm, ObjectTypeTmRm },
-    { L"TmEn", ObjectTypeTmEn, ObjectTypeTmEn },
-    { L"PcwObject", ObjectTypePcwObject, ObjectTypePcwObject },
-    { L"FilterConnectionPort", ObjectTypeFltConnPort, ObjectTypeFltConnPort },
-    { L"FilterCommunicationPort", ObjectTypeFltComnPort, ObjectTypeFltComnPort },
-    { L"PowerRequest", ObjectTypePowerRequest, ObjectTypePowerRequest },
-    { L"EtwConsumer", ObjectTypeETWConsumer, ObjectTypeETWConsumer },
-    { L"TpWorkerFactory", ObjectTypeTpWorkerFactory, ObjectTypeTpWorkerFactory },
-    { L"Composition", ObjectTypeComposition, ObjectTypeComposition },
-    { L"IRTimer", ObjectTypeIRTimer, ObjectTypeIRTimer },
-    { L"DxgkSharedResource", ObjectTypeDxgkSharedResource, DIRECTX_SHARED_IMAGE_INDEX },
-    { L"DxgkSharedSwapChainObject", ObjectTypeDxgkSharedSwapChain, DIRECTX_SHARED_IMAGE_INDEX },
-    { L"DxgkSharedSyncObject", ObjectTypeDxgkSharedSyncObject, DIRECTX_SHARED_IMAGE_INDEX },
-    { L"DxgkCurrentDxgProcessObject", ObjectTypeDxgkCurrentDxgProcessObject, DIRECTX_SHARED_IMAGE_INDEX },
-    { L"Partition", ObjectTypeMemoryPartition, ObjectTypeMemoryPartition },
-    { L"", ObjectTypeUnknown, ObjectTypeUnknown }
+    { L"Device", ObjectTypeDevice, IDI_ICON_DEVICE },
+    { L"Driver", ObjectTypeDriver, IDI_ICON_DRIVER },
+    { L"Section", ObjectTypeSection, IDI_ICON_SECTION },
+    { L"ALPC Port", ObjectTypePort, IDI_ICON_PORT },
+    { L"SymbolicLink", ObjectTypeSymbolicLink, IDI_ICON_SYMLINK },
+    { L"Key", ObjectTypeKey, IDI_ICON_KEY },
+    { L"Event", ObjectTypeEvent, IDI_ICON_EVENT },
+    { L"Job", ObjectTypeJob, IDI_ICON_JOB },
+    { L"Mutant", ObjectTypeMutant, IDI_ICON_MUTANT },
+    { L"KeyedEvent", ObjectTypeKeyedEvent, IDI_ICON_KEYEDEVENT },
+    { L"Type", ObjectTypeType, IDI_ICON_TYPE },
+    { L"Directory", ObjectTypeDirectory, IDI_ICON_DIRECTORY },
+    { L"WindowStation", ObjectTypeWinstation, IDI_ICON_WINSTATION },
+    { L"Callback", ObjectTypeCallback, IDI_ICON_CALLBACK },
+    { L"Semaphore", ObjectTypeSemaphore, IDI_ICON_SEMAPHORE },
+    { L"WaitablePort", ObjectTypeWaitablePort, IDI_ICON_WAITABLEPORT },
+    { L"Timer", ObjectTypeTimer, IDI_ICON_TIMER },
+    { L"Session", ObjectTypeSession, IDI_ICON_SESSION },
+    { L"Controller", ObjectTypeController, IDI_ICON_CONTROLLER },
+    { L"Profile", ObjectTypeProfile, IDI_ICON_PROFILE },
+    { L"EventPair", ObjectTypeEventPair, IDI_ICON_EVENTPAIR },
+    { L"Desktop", ObjectTypeDesktop, IDI_ICON_DESKTOP },
+    { L"File", ObjectTypeFile, IDI_ICON_FILE },
+    { L"WMIGuid", ObjectTypeWMIGuid, IDI_ICON_WMIGUID },
+    { L"DebugObject", ObjectTypeDebugObject, IDI_ICON_DEBUGOBJECT },
+    { L"IoCompletion", ObjectTypeIoCompletion, IDI_ICON_IOCOMPLETION },
+    { L"Process", ObjectTypeProcess, IDI_ICON_PROCESS },
+    { L"Adapter", ObjectTypeAdapter, IDI_ICON_ADAPTER },
+    { L"Token", ObjectTypeToken, IDI_ICON_TOKEN },
+    { L"EtwRegistration", ObjectTypeETWRegistration, IDI_ICON_ETWREGISTRATION },
+    { L"Thread", ObjectTypeThread, IDI_ICON_THREAD },
+    { L"TmTx", ObjectTypeTmTx, IDI_ICON_TMTX },
+    { L"TmTm", ObjectTypeTmTm, IDI_ICON_TMTM },
+    { L"TmRm", ObjectTypeTmRm, IDI_ICON_TMRM },
+    { L"TmEn", ObjectTypeTmEn, IDI_ICON_TMEN },
+    { L"PcwObject", ObjectTypePcwObject, IDI_ICON_PCWOBJECT },
+    { L"FilterConnectionPort", ObjectTypeFltConnPort, IDI_ICON_FLTCONNPORT },
+    { L"FilterCommunicationPort", ObjectTypeFltComnPort, IDI_ICON_FLTCOMMPORT },
+    { L"PowerRequest", ObjectTypePowerRequest, IDI_ICON_POWERREQUEST },
+    { L"EtwConsumer", ObjectTypeETWConsumer, IDI_ICON_ETWCONSUMER },
+    { L"TpWorkerFactory", ObjectTypeTpWorkerFactory, IDI_ICON_TPWORKERFACTORY },
+    { L"Composition", ObjectTypeComposition, IDI_ICON_COMPOSITION },
+    { L"IRTimer", ObjectTypeIRTimer, IDI_ICON_IRTIMER },
+    { L"DxgkSharedResource", ObjectTypeDxgkSharedResource, IDI_ICON_DXOBJECT },
+    { L"DxgkSharedSwapChainObject", ObjectTypeDxgkSharedSwapChain, IDI_ICON_DXOBJECT },
+    { L"DxgkSharedSyncObject", ObjectTypeDxgkSharedSyncObject, IDI_ICON_DXOBJECT },
+    { L"DxgkCurrentDxgProcessObject", ObjectTypeDxgkCurrentDxgProcessObject, IDI_ICON_DXOBJECT },
+    { L"DxgkDisplayManagerObject", ObjectTypeDxgkDisplayManager, IDI_ICON_DXOBJECT },
+    { L"DxgkSharedBundleObject", ObjectTypeDxgkSharedBundle, IDI_ICON_DXOBJECT },
+    { L"DxgkSharedProtectedSessionObject", ObjectTypeDxgkSharedProtectedSession, IDI_ICON_DXOBJECT },
+    { L"Partition", ObjectTypeMemoryPartition, IDI_ICON_MEMORYPARTITION },
+    { L"RegistryTransaction", ObjectTypeRegistryTransaction, IDI_ICON_KEY },
+    { L"", ObjectTypeUnknown, IDI_ICON_UNKNOWN }
 };
+
+
+//
+// Future use
+//
+/*
+
+Usually none of these object types identities present in object directory (additionally depends on UnnamedObjectsOnly flag set).
+
+ActivationObject
+ActivityReference
+CoreMessagining
+DmaAdapter
+DmaDomain
+EnergyTracker
+EtwSessionDemuxEntry
+IoCompletionReserve
+NdisCmState
+PsSiloContextNonPaged
+PsSiloContextPaged
+RawInputManager
+UserApcReserve
+VirtualKey
+VRegConfigurationContext
+WaitCompletionPacket
+
+*/
+
 
 HIMAGELIST ObManagerLoadImageList(
     VOID);

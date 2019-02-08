@@ -4,9 +4,9 @@
 *
 *  TITLE:       MAIN.C
 *
-*  VERSION:     1.71
+*  VERSION:     1.72
 *
-*  DATE:        19 Jan 2019
+*  DATE:        06 Feb 2019
 *
 *  Program entry point and main window handler.
 *
@@ -963,6 +963,8 @@ UINT WinObjExMain()
     HANDLE                  hToken;
     HIMAGELIST              TreeViewImages;
 
+    RtlSetHeapInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
+
     if (!WinObjInitGlobals())
         return ERROR_APP_INIT_FAILURE;
 
@@ -1239,6 +1241,9 @@ UINT WinObjExMain()
         //
         g_ListViewImages = ObManagerLoadImageList();
         if (g_ListViewImages) {
+            //
+            // Append two column sorting images to the end of the listview imagelist.
+            //
             hIcon = (HICON)LoadImage(g_WinObj.hInstance, MAKEINTRESOURCE(IDI_ICON_SORTUP), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
             if (hIcon) {
                 ImageList_ReplaceIcon(g_ListViewImages, -1, hIcon);

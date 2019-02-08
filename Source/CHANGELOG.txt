@@ -2,6 +2,7 @@ v1.7.2
 + symbolic link object dump
 + internal fixes after profiling
 + support for 19H1 SeCiCallbacks scan
++ added more object types descriptions
 
 v1.7.1
 + SeCiCallbacks/g_CiCallbacks, DbgkLmdCallbacks added to the callbacks viewer

@@ -1,12 +1,12 @@
 /*******************************************************************************
 *
-*  (C) COPYRIGHT AUTHORS, 2017 - 2018
+*  (C) COPYRIGHT AUTHORS, 2017 - 2019
 *
 *  TITLE:       OBJECTS.C
 *
-*  VERSION:     1.70
+*  VERSION:     1.72
 *
-*  DATE:        30 Nov 2018
+*  DATE:        06 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -16,6 +16,11 @@
 *******************************************************************************/
 
 #include "global.h"
+
+//
+// Convert resource image id to image list index.
+//
+#define ID_TO_IMAGEID(id) (id) - TYPE_RESOURCE_IMAGE_INDEX_START
 
 /*
 * ObManagerGetNameByIndex
@@ -52,7 +57,7 @@ UINT ObManagerGetImageIndexByTypeIndex(
     if (TypeIndex >= ObjectTypeMax)
         return ObjectTypeUnknown;
 
-    return g_ObjectTypes[TypeIndex].ImageIndex;
+    return ID_TO_IMAGEID(g_ObjectTypes[TypeIndex].ImageIndex);
 }
 
 /*
@@ -121,7 +126,7 @@ UINT ObManagerGetImageIndexByTypeName(
 
     for (nIndex = TYPE_FIRST; nIndex < TYPE_LAST; nIndex++) {
         if (_strcmpi(lpTypeName, g_ObjectTypes[nIndex].Name) == 0)
-            return g_ObjectTypes[nIndex].ImageIndex;
+            return ID_TO_IMAGEID(g_ObjectTypes[nIndex].ImageIndex);
     }
 
     //
@@ -130,7 +135,7 @@ UINT ObManagerGetImageIndexByTypeName(
     // Composition, handle this.
     //
     if (_strcmpi(lpTypeName, L"CompositionSurface") == 0) {
-        return g_ObjectTypes[ObjectTypeComposition].ImageIndex;
+        return ID_TO_IMAGEID(g_ObjectTypes[nIndex].ImageIndex);
     }
 
     //
@@ -140,7 +145,7 @@ UINT ObManagerGetImageIndexByTypeName(
     //
     /*    
     if (_strcmpi(lpTypeName, L"NetworkNamespace") == 0) {
-        return g_ObjectTypes[ObjectTypeComposition].ImageIndex;
+        return ID_TO_IMAGEID(g_ObjectTypes[nIndex].ImageIndex); 
     }
     */
 
@@ -159,7 +164,7 @@ HIMAGELIST ObManagerLoadImageList(
     VOID
 )
 {
-    UINT       i, imageIndex;
+    UINT       i;
     HIMAGELIST list;
     HICON      hIcon;
 
@@ -171,12 +176,10 @@ HIMAGELIST ObManagerLoadImageList(
         8);
 
     if (list) {
-        for (i = TYPE_FIRST; i <= TYPE_LAST; i++) {
-            
-            imageIndex = TYPE_RESOURCE_IMAGE_INDEX_START + g_ObjectTypes[i].ImageIndex;
-            
+        for (i = TYPE_FIRST; i <= TYPE_LAST; i++) { //must include ObjectTypeUnknown
+                       
             hIcon = (HICON)LoadImage(g_WinObj.hInstance, 
-                MAKEINTRESOURCE(imageIndex), 
+                MAKEINTRESOURCE(g_ObjectTypes[i].ImageIndex),
                 IMAGE_ICON, 
                 16, 
                 16, 
@@ -190,33 +193,3 @@ HIMAGELIST ObManagerLoadImageList(
     }
     return list;
 }
-
-//
-// Future use
-//
-/*
-
-Usually none of these object types identities present in object directory.
-
-ActivationObject
-ActivityReference
-CoreMessagining
-DmaAdapter
-DmaDomain
-DxgkDisplayManagerObject
-DxgkSharedBundleObject
-DxgkSharedProtectedSessionObject
-EnergyTracker
-EtwSessionDemuxEntry
-IoCompletionReserve
-NdisCmState
-PsSiloContextNonPaged
-PsSiloContextPaged
-RawInputManager
-RegistryTransaction
-UserApcReserve
-VirtualKey
-VRegConfigurationContext
-WaitCompletionPacket
-
-*/

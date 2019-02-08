@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        05 Feb 2019
+*  DATE:        06 Feb 2019
 *
 *  MINIMUM SUPPORTED OS WINDOWS 7
 *
@@ -2827,6 +2827,11 @@ VOID kdInit(
     RtlSecureZeroMemory(&g_SystemCallbacks, sizeof(g_SystemCallbacks));
 
     g_kdctx.ShowKdError = TRUE;
+
+    //
+    // Default driver load status.
+    //
+    g_kdctx.drvOpenLoadStatus = ERROR_NOT_CAPABLE;
 
     InitializeListHead(&g_kdctx.ObCollection.ListHead);
 
