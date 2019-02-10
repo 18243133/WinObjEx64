@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        06 Feb 2019
+*  DATE:        07 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -83,26 +83,6 @@ UINT ObManagerGetIndexByTypeName(
             return nIndex;
     }
 
-    //
-    // In Win8 the following Win32k object was named 
-    // CompositionSurface, in Win8.1 MS renamed it to
-    // Composition, handle this.
-    //
-    if (_strcmpi(lpTypeName, L"CompositionSurface") == 0) {
-        return ObjectTypeComposition;
-    }
-
-    //
-    // In Win10 TH1 the following ntos object was named 
-    // NetworkNamespace, later in Win10 updates MS renamed it to
-    // NdisCmState, handle this.
-    //
-   /*
-    if (_strcmpi(lpTypeName, L"NetworkNamespace") == 0) {
-        return ObjectTypeNdisCmState;
-    }
-    */
-
     return ObjectTypeUnknown;
 }
 
@@ -128,26 +108,6 @@ UINT ObManagerGetImageIndexByTypeName(
         if (_strcmpi(lpTypeName, g_ObjectTypes[nIndex].Name) == 0)
             return ID_TO_IMAGEID(g_ObjectTypes[nIndex].ImageIndex);
     }
-
-    //
-    // In Win8 the following Win32k object was named 
-    // CompositionSurface, in Win8.1 MS renamed it to
-    // Composition, handle this.
-    //
-    if (_strcmpi(lpTypeName, L"CompositionSurface") == 0) {
-        return ID_TO_IMAGEID(g_ObjectTypes[nIndex].ImageIndex);
-    }
-
-    //
-    // In Win10 TH1 the following ntos object was named 
-    // NetworkNamespace, later in Win10 updates MS renamed it to
-    // NdisCmState, handle this.
-    //
-    /*    
-    if (_strcmpi(lpTypeName, L"NetworkNamespace") == 0) {
-        return ID_TO_IMAGEID(g_ObjectTypes[nIndex].ImageIndex); 
-    }
-    */
 
     return ObjectTypeUnknown;
 }

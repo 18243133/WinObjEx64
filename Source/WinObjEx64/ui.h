@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        04 Feb 2019
+*  DATE:        07 Feb 2019
 *
 *  Common header file for the user interface.
 *
@@ -53,6 +53,7 @@ typedef HWND(WINAPI *pfnHtmlHelpW)(
 #define T_COPYADDINFO           L"Copy Additional Info Field Text"
 #define T_SAVETOFILE            L"Save list to File"
 #define T_DUMPDRIVER            L"Dump Driver"
+#define T_VIEW_REFRESH          L"Refresh"
 
 typedef enum _WOBJ_DIALOGS_ID {
     wobjFindDlgId = 0,

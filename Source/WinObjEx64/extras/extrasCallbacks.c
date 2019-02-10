@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        04 Feb 2019
+*  DATE:        06 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -3117,6 +3117,8 @@ VOID CallbacksList(
     __finally {
         supHeapFree(Modules);
     }
+
+    SetFocus(TreeList);
 }
 
 /*
@@ -3140,6 +3142,9 @@ VOID CallbacksDialogHandlePopupMenu(
     hMenu = CreatePopupMenu();
     if (hMenu) {
         InsertMenu(hMenu, 0, MF_BYCOMMAND, ID_OBJECT_COPY, T_COPYADDRESS);
+        InsertMenu(hMenu, 1, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
+        InsertMenu(hMenu, 2, MF_BYCOMMAND, ID_VIEW_REFRESH, T_VIEW_REFRESH);
+           
         TrackPopupMenu(hMenu, TPM_RIGHTBUTTON | TPM_LEFTALIGN, pt1.x, pt1.y, 0, hwndDlg, NULL);
         DestroyMenu(hMenu);
     }
@@ -3267,6 +3272,13 @@ INT_PTR CALLBACK CallbacksDialogProc(
             pDlgContext = (EXTRASCONTEXT*)GetProp(hwndDlg, T_DLGCONTEXT);
             if (pDlgContext) {
                 CallbacksDialogCopyAddress(pDlgContext->TreeList);
+            }
+            break;
+        case ID_VIEW_REFRESH:
+            pDlgContext = (EXTRASCONTEXT*)GetProp(hwndDlg, T_DLGCONTEXT);
+            if (pDlgContext) {
+                TreeList_ClearTree(pDlgContext->TreeList);
+                CallbacksList(hwndDlg, pDlgContext->TreeList);
             }
             break;
         default:
