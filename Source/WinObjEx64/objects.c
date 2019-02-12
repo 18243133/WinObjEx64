@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        07 Feb 2019
+*  DATE:        09 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -17,10 +17,27 @@
 
 #include "global.h"
 
-//
-// Convert resource image id to image list index.
-//
-#define ID_TO_IMAGEID(id) (id) - TYPE_RESOURCE_IMAGE_INDEX_START
+/*
+* ObManagerComparerName
+*
+* Purpose:
+*
+* Support comparer routine to work with objects array.
+*
+*/
+INT ObManagerComparerName(
+    _In_ PCVOID FirstObject,
+    _In_ PCVOID SecondObject
+)
+{
+    WOBJ_TYPE_DESC *firstObject = (WOBJ_TYPE_DESC*)FirstObject;
+    WOBJ_TYPE_DESC *secondObject = (WOBJ_TYPE_DESC*)SecondObject;
+
+    if (firstObject == secondObject) 
+        return 0;
+
+    return (_strcmpi(firstObject->Name, secondObject->Name));
+}
 
 /*
 * ObManagerGetNameByIndex
@@ -29,16 +46,19 @@
 *
 * Returns object name by index of known type.
 *
-*
 */
 LPWSTR ObManagerGetNameByIndex(
     _In_ ULONG TypeIndex
 )
 {
-    if (TypeIndex >= ObjectTypeMax)
-        return g_ObjectTypes[ObjectTypeUnknown].Name;
+    ULONG nIndex;
 
-    return g_ObjectTypes[TypeIndex].Name;
+    for (nIndex = TYPE_FIRST; nIndex < TYPE_LAST; nIndex++) {
+        if (g_ObjectTypes[nIndex].Index == (WOBJ_OBJECT_TYPE)TypeIndex)
+            return g_ObjectTypes[nIndex].Name;
+    }
+
+    return OBTYPE_NAME_UNKNOWN;
 }
 
 /*
@@ -54,10 +74,48 @@ UINT ObManagerGetImageIndexByTypeIndex(
     _In_ ULONG TypeIndex
 )
 {
-    if (TypeIndex >= ObjectTypeMax)
-        return ObjectTypeUnknown;
+    ULONG nIndex;
 
-    return ID_TO_IMAGEID(g_ObjectTypes[TypeIndex].ImageIndex);
+    for (nIndex = TYPE_FIRST; nIndex < TYPE_LAST; nIndex++) {
+        if (g_ObjectTypes[nIndex].Index == (WOBJ_OBJECT_TYPE)TypeIndex)
+            return g_ObjectTypes[nIndex].ImageIndex;
+    }
+
+    return ObjectTypeUnknown;
+}
+
+/*
+* ObManagerGetEntryByTypeName
+*
+* Purpose:
+*
+* Returns object description entry by type name.
+*
+*/
+WOBJ_TYPE_DESC *ObManagerGetEntryByTypeName(
+    _In_ LPCWSTR lpTypeName
+)
+{
+    WOBJ_TYPE_DESC SearchItem;
+    WOBJ_TYPE_DESC *Result;
+
+    if (lpTypeName == NULL) {
+        return &g_ObjectTypes[ObjectTypeUnknown];
+    }
+
+    SearchItem.Name = (LPWSTR)lpTypeName;
+
+    Result = (WOBJ_TYPE_DESC*)supBSearch((PCVOID)&SearchItem,
+        (PCVOID)&g_ObjectTypes,
+        RTL_NUMBER_OF(g_ObjectTypes),
+        sizeof(WOBJ_TYPE_DESC),
+        ObManagerComparerName);   
+
+    if (Result == NULL) {
+        Result = &g_ObjectTypes[ObjectTypeUnknown];
+    }
+
+    return Result;
 }
 
 /*
@@ -72,18 +130,27 @@ UINT ObManagerGetIndexByTypeName(
     _In_ LPCWSTR lpTypeName
 )
 {
-    UINT nIndex;
+    WOBJ_TYPE_DESC SearchItem;
+    WOBJ_TYPE_DESC *Result;
 
     if (lpTypeName == NULL) {
         return ObjectTypeUnknown;
     }
 
-    for (nIndex = TYPE_FIRST; nIndex < TYPE_LAST; nIndex++) {
-        if (_strcmpi(lpTypeName, g_ObjectTypes[nIndex].Name) == 0)
-            return nIndex;
-    }
+    SearchItem.Name = (LPWSTR)lpTypeName;
 
-    return ObjectTypeUnknown;
+    Result = (WOBJ_TYPE_DESC*)supBSearch((PCVOID)&SearchItem,
+        (PCVOID)&g_ObjectTypes, 
+        RTL_NUMBER_OF(g_ObjectTypes), 
+        sizeof(WOBJ_TYPE_DESC), 
+        ObManagerComparerName);
+
+    if (Result) {
+        return Result->Index;
+    }
+    else {
+        return ObjectTypeUnknown;
+    }
 }
 
 /*
@@ -106,7 +173,7 @@ UINT ObManagerGetImageIndexByTypeName(
 
     for (nIndex = TYPE_FIRST; nIndex < TYPE_LAST; nIndex++) {
         if (_strcmpi(lpTypeName, g_ObjectTypes[nIndex].Name) == 0)
-            return ID_TO_IMAGEID(g_ObjectTypes[nIndex].ImageIndex);
+            return g_ObjectTypes[nIndex].ImageIndex;
     }
 
     return ObjectTypeUnknown;
@@ -137,16 +204,18 @@ HIMAGELIST ObManagerLoadImageList(
 
     if (list) {
         for (i = TYPE_FIRST; i <= TYPE_LAST; i++) { //must include ObjectTypeUnknown
-                       
+               
+            g_ObjectTypes[i].SelfIndex = i;
+
             hIcon = (HICON)LoadImage(g_WinObj.hInstance, 
-                MAKEINTRESOURCE(g_ObjectTypes[i].ImageIndex),
+                MAKEINTRESOURCE(g_ObjectTypes[i].ResourceImageId),
                 IMAGE_ICON, 
                 16, 
                 16, 
                 LR_DEFAULTCOLOR);
 
             if (hIcon) {
-                ImageList_ReplaceIcon(list, -1, hIcon);
+                g_ObjectTypes[i].ImageIndex = ImageList_ReplaceIcon(list, -1, hIcon);
                 DestroyIcon(hIcon);
             }
         }

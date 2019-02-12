@@ -11,13 +11,7 @@ VRegConfigurationContext - new RS1 object
 VirtualKey - new RS1 object (not present in RS2)
 PsSiloContextPaged - new RS1 object
 PsSiloContextNonPaged - new RS1 object
-RegistryTransaction - new RS1 object
 CoreMessagining - new RS1 object
 ActivityReference - new RS2 object
 EtwSessionDemuxEntry - new Win10 object
-DxgkCompositionObject - Dxgk
-DxgkDisplayManagerObject - Dxgk
-DxgkSharedBundleObject - Dxgk
-DxgkSharedKeyedMutextObject - Dxgk
-DxgkSharedProtectedSessionObject - Dxgk
 ActivationObject - 19H1, win32k managed object

@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        04 Feb 2019
+*  DATE:        09 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -1736,7 +1736,7 @@ INT_PTR CALLBACK BasicPropDialogProc(
             hDc = BeginPaint(hwndDlg, &Paint);
             if (hDc) {
 
-                ImageList_Draw(g_ListViewImages, Context->TypeIndex, hDc, 24, 34,
+                ImageList_Draw(g_ListViewImages, Context->TypeDescription->ImageIndex, hDc, 24, 34,
                     ILD_NORMAL | ILD_TRANSPARENT);
 
                 EndPaint(hwndDlg, &Paint);

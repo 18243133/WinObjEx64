@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        06 Feb 2019
+*  DATE:        09 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -188,8 +188,8 @@ static const BYTE CiCallbackIndexes_Win10RS3[CI_CALLBACK_NAMES_W10RS3_COUNT] = {
     22  //CiGetBuildExpiryTime
 };
 
-#define CI_CALLBACK_NAMES_W10RS4_RS5_COUNT 24
-static const BYTE CiCallbackIndexes_Win10RS4_RS5[CI_CALLBACK_NAMES_W10RS4_RS5_COUNT] = { //Windows 10 RS4/RS5/19H1
+#define CI_CALLBACK_NAMES_W10RS4_19H1_COUNT 24
+static const BYTE CiCallbackIndexes_Win10RS4_19H1[CI_CALLBACK_NAMES_W10RS4_19H1_COUNT] = { //Windows 10 RS4/RS5/19H1
     0,  //CiSetFileCache
     1,  //CiGetFileCache
     2,  //CiQueryInformation
@@ -272,8 +272,8 @@ LPWSTR GetCiRoutineNameFromIndex(
     case 17134:
     case 17763:
     default:
-        Indexes = CiCallbackIndexes_Win10RS4_RS5;
-        ArrayCount = CI_CALLBACK_NAMES_W10RS4_RS5_COUNT;
+        Indexes = CiCallbackIndexes_Win10RS4_19H1;
+        ArrayCount = CI_CALLBACK_NAMES_W10RS4_19H1_COUNT;
         break;
     }
 
@@ -2796,7 +2796,7 @@ VOID CallbacksList(
     _In_ HWND hwndDlg,
     _In_ HWND TreeList)
 {
-    PRTL_PROCESS_MODULES Modules;
+    PRTL_PROCESS_MODULES Modules = NULL;
 
     __try {
         //
@@ -2877,13 +2877,14 @@ VOID CallbacksList(
         MessageBox(hwndDlg, TEXT("An exception occured during callback query"), NULL, MB_ICONERROR);
     }
 
-    Modules = (PRTL_PROCESS_MODULES)supGetSystemInfo(SystemModuleInformation);
-    if (Modules == NULL) {
-        MessageBox(hwndDlg, TEXT("Could not allocate memory for modules list."), NULL, MB_ICONERROR);
-        return;
-    }
-
     __try {
+
+        Modules = (PRTL_PROCESS_MODULES)supGetSystemInfo(SystemModuleInformation);
+        if (Modules == NULL) {
+            MessageBox(hwndDlg, TEXT("Could not allocate memory for modules list."), NULL, MB_ICONERROR);
+            __leave;
+        }
+
 
         //
         // List process callbacks.
@@ -3115,7 +3116,7 @@ VOID CallbacksList(
 
     }
     __finally {
-        supHeapFree(Modules);
+        if (Modules) supHeapFree(Modules);
     }
 
     SetFocus(TreeList);
@@ -3144,7 +3145,7 @@ VOID CallbacksDialogHandlePopupMenu(
         InsertMenu(hMenu, 0, MF_BYCOMMAND, ID_OBJECT_COPY, T_COPYADDRESS);
         InsertMenu(hMenu, 1, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
         InsertMenu(hMenu, 2, MF_BYCOMMAND, ID_VIEW_REFRESH, T_VIEW_REFRESH);
-           
+
         TrackPopupMenu(hMenu, TPM_RIGHTBUTTON | TPM_LEFTALIGN, pt1.x, pt1.y, 0, hwndDlg, NULL);
         DestroyMenu(hMenu);
     }
@@ -3214,6 +3215,42 @@ VOID CallbacksDialogCopyAddress(
 }
 
 /*
+* CallbackDialogContentRefresh
+*
+* Purpose:
+*
+* Refresh callback list handler.
+*
+*/
+VOID CallbackDialogContentRefresh(
+    _In_  HWND hwndDlg,
+    _In_ EXTRASCONTEXT *pDlgContext,
+    _In_ BOOL fResetContent
+)
+{
+#ifndef _DEBUG
+    HWND hwndBanner = supDisplayLoadBanner(hwndDlg,
+        TEXT("Processing callbacks list, please wait"));
+#endif
+
+    __try {
+
+        SetCapture(hwndDlg);
+
+        if (fResetContent) TreeList_ClearTree(pDlgContext->TreeList);
+
+        CallbacksList(hwndDlg, pDlgContext->TreeList);
+
+    }
+    __finally {
+        ReleaseCapture();
+#ifndef _DEBUG
+        SendMessage(hwndBanner, WM_CLOSE, 0, 0);
+#endif
+    }
+}
+
+/*
 * CallbacksDialogProc
 *
 * Purpose:
@@ -3277,8 +3314,7 @@ INT_PTR CALLBACK CallbacksDialogProc(
         case ID_VIEW_REFRESH:
             pDlgContext = (EXTRASCONTEXT*)GetProp(hwndDlg, T_DLGCONTEXT);
             if (pDlgContext) {
-                TreeList_ClearTree(pDlgContext->TreeList);
-                CallbacksList(hwndDlg, pDlgContext->TreeList);
+                CallbackDialogContentRefresh(hwndDlg, pDlgContext, TRUE);
             }
             break;
         default:
@@ -3372,7 +3408,7 @@ VOID extrasCreateCallbacksDialog(
         hdritem.pszText = TEXT("Additional Information");
         TreeList_InsertHeaderItem(pDlgContext->TreeList, 2, &hdritem);
 
-        CallbacksList(hwndDlg, pDlgContext->TreeList);
+        CallbackDialogContentRefresh(hwndDlg, pDlgContext, FALSE);
     }
 
     SendMessage(hwndDlg, WM_SIZE, 0, 0);

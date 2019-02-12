@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        07 Feb 2019
+*  DATE:        09 Feb 2019
 *
 *  Common header file for the user interface.
 *
@@ -111,13 +111,14 @@ typedef struct _PROP_OBJECT_INFO {
     BOOL IsPrivateNamespaceObject;
     BOOL IsType; //TRUE if selected object is object type
     INT TypeIndex;
-    INT RealTypeIndex;//save index for type
     DWORD ObjectFlags;//object specific flags
     LPWSTR lpObjectName;
     LPWSTR lpObjectType;
     LPWSTR lpCurrentObjectPath;
     LPWSTR lpDescription; //description from main list (3rd column)
     ULONG_PTR Tag;
+    WOBJ_TYPE_DESC *TypeDescription;
+    WOBJ_TYPE_DESC *ShadowTypeDescription; //valid only for types, same as TypeDescription for everything else.
     OBJINFO ObjectInfo; //object dump related structures
     PROP_NAMESPACE_INFO NamespaceInfo;
 } PROP_OBJECT_INFO, *PPROP_OBJECT_INFO;

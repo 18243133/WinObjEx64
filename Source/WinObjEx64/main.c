@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        06 Feb 2019
+*  DATE:        09 Feb 2019
 *
 *  Program entry point and main window handler.
 *
@@ -173,7 +173,7 @@ VOID MainWindowHandleObjectTreeProp(
         propCreateDialog(
             hwnd,
             szBuffer,
-            g_ObjectTypes[ObjectTypeDirectory].Name,
+            OBTYPE_NAME_DIRECTORY,
             NULL,
             NULL);
     }

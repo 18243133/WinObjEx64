@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        05 Feb 2019
+*  DATE:        09 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -267,6 +267,13 @@ PPROP_OBJECT_INFO propContextCreate(
         if (Context == NULL)
             return NULL;
 
+        Context->TypeDescription = ObManagerGetEntryByTypeName(lpObjectType);
+
+        //
+        // Use the same type descriptor by default for shadow.
+        //
+        Context->ShadowTypeDescription = Context->TypeDescription;
+
         //
         // Copy object name if given.
         //
@@ -321,14 +328,9 @@ PPROP_OBJECT_INFO propContextCreate(
             // Query actual type index for case when user will browse Type object info.
             //
             if (Context->lpObjectName) {
-                Context->RealTypeIndex = ObManagerGetIndexByTypeName(Context->lpObjectName);
+                Context->ShadowTypeDescription = ObManagerGetEntryByTypeName(Context->lpObjectName);
             }
-        }
-        else {
-            //
-            // Use the same type index for everything else.
-            //
-            Context->RealTypeIndex = Context->TypeIndex;
+
         }
 
     }

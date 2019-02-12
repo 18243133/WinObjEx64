@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        06 Feb 2019
+*  DATE:        09 Feb 2019
 *
 *  MINIMUM SUPPORTED OS WINDOWS 7
 *
@@ -2950,7 +2950,7 @@ ULONG_PTR KdFindCiCallbacks(
 
     PBYTE   Signature = NULL, ptrCode = NULL, InstructionMatchPattern = NULL;
     ULONG   SignatureSize = 0, InstructionMatchLength;
-    ULONG	InstructionExactMatchLength;
+    ULONG   InstructionExactMatchLength;
 
     PVOID   SectionBase;
     ULONG   SectionSize = 0, Index;
