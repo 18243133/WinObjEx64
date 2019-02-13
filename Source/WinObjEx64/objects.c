@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        09 Feb 2019
+*  DATE:        10 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -93,7 +93,7 @@ UINT ObManagerGetImageIndexByTypeIndex(
 *
 */
 WOBJ_TYPE_DESC *ObManagerGetEntryByTypeName(
-    _In_ LPCWSTR lpTypeName
+    _In_opt_ LPCWSTR lpTypeName
 )
 {
     WOBJ_TYPE_DESC SearchItem;
@@ -127,7 +127,7 @@ WOBJ_TYPE_DESC *ObManagerGetEntryByTypeName(
 *
 */
 UINT ObManagerGetIndexByTypeName(
-    _In_ LPCWSTR lpTypeName
+    _In_opt_ LPCWSTR lpTypeName
 )
 {
     WOBJ_TYPE_DESC SearchItem;
@@ -162,21 +162,30 @@ UINT ObManagerGetIndexByTypeName(
 *
 */
 UINT ObManagerGetImageIndexByTypeName(
-    _In_ LPCWSTR lpTypeName
+    _In_opt_ LPCWSTR lpTypeName
 )
 {
-    UINT nIndex;
+    WOBJ_TYPE_DESC SearchItem;
+    WOBJ_TYPE_DESC *Result;
 
     if (lpTypeName == NULL) {
         return ObjectTypeUnknown;
     }
 
-    for (nIndex = TYPE_FIRST; nIndex < TYPE_LAST; nIndex++) {
-        if (_strcmpi(lpTypeName, g_ObjectTypes[nIndex].Name) == 0)
-            return g_ObjectTypes[nIndex].ImageIndex;
-    }
+    SearchItem.Name = (LPWSTR)lpTypeName;
 
-    return ObjectTypeUnknown;
+    Result = (WOBJ_TYPE_DESC*)supBSearch((PCVOID)&SearchItem,
+        (PCVOID)&g_ObjectTypes,
+        RTL_NUMBER_OF(g_ObjectTypes),
+        sizeof(WOBJ_TYPE_DESC),
+        ObManagerComparerName);
+
+    if (Result) {
+        return Result->ImageIndex;
+    }
+    else {
+        return ObjectTypeUnknown;
+    }
 }
 
 /*
@@ -205,8 +214,6 @@ HIMAGELIST ObManagerLoadImageList(
     if (list) {
         for (i = TYPE_FIRST; i <= TYPE_LAST; i++) { //must include ObjectTypeUnknown
                
-            g_ObjectTypes[i].SelfIndex = i;
-
             hIcon = (HICON)LoadImage(g_WinObj.hInstance, 
                 MAKEINTRESOURCE(g_ObjectTypes[i].ResourceImageId),
                 IMAGE_ICON, 
@@ -217,6 +224,9 @@ HIMAGELIST ObManagerLoadImageList(
             if (hIcon) {
                 g_ObjectTypes[i].ImageIndex = ImageList_ReplaceIcon(list, -1, hIcon);
                 DestroyIcon(hIcon);
+            }
+            else {
+                g_ObjectTypes[i].ImageIndex = I_IMAGENONE;
             }
         }
     }

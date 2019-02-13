@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        09 Feb 2019
+*  DATE:        10 Feb 2019
 *
 *  Program entry point and main window handler.
 *
@@ -863,7 +863,8 @@ BOOL MainWindowDlgMsgHandler(
 * Initialize global variables.
 *
 */
-BOOL WinObjInitGlobals()
+BOOL WinObjInitGlobals(
+    _In_ BOOL IsWine)
 {
     SIZE_T cch;
     BOOL bResult = FALSE, bCond = FALSE;
@@ -894,7 +895,9 @@ BOOL WinObjInitGlobals()
         if (g_WinObj.Heap == NULL)
             break;
 
-        RtlSetHeapInformation(g_WinObj.Heap, HeapEnableTerminationOnCorruption, NULL, 0);
+        if (IsWine == FALSE) {
+            RtlSetHeapInformation(g_WinObj.Heap, HeapEnableTerminationOnCorruption, NULL, 0);
+        }
         RtlInitializeCriticalSection(&g_WinObj.Lock);
 
         //
@@ -963,16 +966,22 @@ UINT WinObjExMain()
     HANDLE                  hToken;
     HIMAGELIST              TreeViewImages;
 
-    RtlSetHeapInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
+    IsWine = supIsWine();
 
-    if (!WinObjInitGlobals())
+    //
+    // wine 1.6 xenial does not suport this routine.
+    //
+    if (IsWine == FALSE) {
+        RtlSetHeapInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
+    }
+
+    if (!WinObjInitGlobals(IsWine))
         return ERROR_APP_INIT_FAILURE;
 
     // do not move anywhere
     IsFullAdmin = supUserIsFullAdmin();
 
     // check compatibility
-    IsWine = supIsWine();
     if (IsWine != FALSE) {
         IsFullAdmin = FALSE;
     }

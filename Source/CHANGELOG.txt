@@ -3,6 +3,7 @@ v1.7.2
 + internal fixes after profiling
 + support for 19H1 SeCiCallbacks scan
 + added more object types descriptions
++ updated object type descriptions
 
 v1.7.1
 + SeCiCallbacks/g_CiCallbacks, DbgkLmdCallbacks added to the callbacks viewer

@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        09 Feb 2019
+*  DATE:        10 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -2072,7 +2072,7 @@ VOID DumpObCallbacks(
             sizeof(Registration),
             NULL))
         {
-            AltitudeSize = 8 + Registration.Altitude.Length;
+            AltitudeSize = 8 + (SIZE_T)Registration.Altitude.Length;
             lpInfoBuffer = (LPWSTR)supHeapAlloc(AltitudeSize);
             if (lpInfoBuffer) {
 
