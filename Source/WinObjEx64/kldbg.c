@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        09 Feb 2019
+*  DATE:        13 Feb 2019
 *
 *  MINIMUM SUPPORTED OS WINDOWS 7
 *
@@ -818,7 +818,7 @@ UCHAR ObpFindHeaderCookie(
 *
 * Limitation:
 *
-* OS dependent, Windows 10 (14393 - 17763).
+* OS dependent, Windows 10 (RS1 - 19H1).
 *
 */
 PVOID ObFindPrivateNamespaceLookupTable2(

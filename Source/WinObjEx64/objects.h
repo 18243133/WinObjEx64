@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        10 Feb 2019
+*  DATE:        13 Feb 2019
 *
 *  Header file for internal Windows object types handling.
 *
@@ -108,10 +108,12 @@ typedef struct _WOBJ_TYPE_DESC {
 #define OBTYPE_NAME_WINSTATION      L"WindowStation"
 #define OBTYPE_NAME_UNKNOWN         L""
 
+static WOBJ_TYPE_DESC g_TypeUnknown = { OBTYPE_NAME_UNKNOWN, ObjectTypeUnknown, IDI_ICON_UNKNOWN, IDS_DESC_UNKNOWN };
+
 //
 // Handled object types.
 //
-// ObjectTypeUnknown must be always last.
+// Sorted in alphabetical order.
 //
 static WOBJ_TYPE_DESC g_ObjectTypes[] = {
     //{ L"ActivationObject", ObjectTypeActivationObject, IDI_ICON_ACTIVATIONOBJECT, IDS_DESC_ACTIVATIONOBJECT },
@@ -183,8 +185,7 @@ static WOBJ_TYPE_DESC g_ObjectTypes[] = {
     { L"WaitablePort", ObjectTypeWaitablePort, IDI_ICON_WAITABLEPORT, IDS_DESC_WAITABLEPORT },
     //{ L"WaitCompletionPacket", ObjectTypeWaitCompletionPacket, IDI_ICON_WAITCOMPLETIONPACKET, IDS_DESC_WAITCOMPLETIONPACKET },
     { OBTYPE_NAME_WINSTATION, ObjectTypeWinstation, IDI_ICON_WINSTATION, IDS_DESC_WINSTATION },
-    { L"WMIGuid", ObjectTypeWMIGuid, IDI_ICON_WMIGUID, IDS_DESC_WMIGUID },
-    { OBTYPE_NAME_UNKNOWN, ObjectTypeUnknown, IDI_ICON_UNKNOWN, IDS_DESC_UNKNOWN }
+    { L"WmiGuid", ObjectTypeWMIGuid, IDI_ICON_WMIGUID, IDS_DESC_WMIGUID }
 };
 
 HIMAGELIST ObManagerLoadImageList(

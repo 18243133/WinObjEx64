@@ -6,7 +6,7 @@
 *
 *  VERSION:     1.72
 *
-*  DATE:        10 Feb 2019
+*  DATE:        13 Feb 2019
 *
 * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF
 * ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -33,7 +33,7 @@ INT ObManagerComparerName(
     WOBJ_TYPE_DESC *firstObject = (WOBJ_TYPE_DESC*)FirstObject;
     WOBJ_TYPE_DESC *secondObject = (WOBJ_TYPE_DESC*)SecondObject;
 
-    if (firstObject == secondObject) 
+    if (firstObject == secondObject)
         return 0;
 
     return (_strcmpi(firstObject->Name, secondObject->Name));
@@ -100,7 +100,7 @@ WOBJ_TYPE_DESC *ObManagerGetEntryByTypeName(
     WOBJ_TYPE_DESC *Result;
 
     if (lpTypeName == NULL) {
-        return &g_ObjectTypes[ObjectTypeUnknown];
+        return &g_TypeUnknown;
     }
 
     SearchItem.Name = (LPWSTR)lpTypeName;
@@ -109,10 +109,10 @@ WOBJ_TYPE_DESC *ObManagerGetEntryByTypeName(
         (PCVOID)&g_ObjectTypes,
         RTL_NUMBER_OF(g_ObjectTypes),
         sizeof(WOBJ_TYPE_DESC),
-        ObManagerComparerName);   
+        ObManagerComparerName);
 
     if (Result == NULL) {
-        Result = &g_ObjectTypes[ObjectTypeUnknown];
+        Result = &g_TypeUnknown;
     }
 
     return Result;
@@ -140,9 +140,9 @@ UINT ObManagerGetIndexByTypeName(
     SearchItem.Name = (LPWSTR)lpTypeName;
 
     Result = (WOBJ_TYPE_DESC*)supBSearch((PCVOID)&SearchItem,
-        (PCVOID)&g_ObjectTypes, 
-        RTL_NUMBER_OF(g_ObjectTypes), 
-        sizeof(WOBJ_TYPE_DESC), 
+        (PCVOID)&g_ObjectTypes,
+        RTL_NUMBER_OF(g_ObjectTypes),
+        sizeof(WOBJ_TYPE_DESC),
         ObManagerComparerName);
 
     if (Result) {
@@ -189,6 +189,37 @@ UINT ObManagerGetImageIndexByTypeName(
 }
 
 /*
+* ObManagerLoadImageForType
+*
+* Purpose:
+*
+* Load image of the given id.
+*
+*/
+INT ObManagerLoadImageForType(
+    _In_ HIMAGELIST ImageList,
+    _In_ INT ResourceImageId
+)
+{
+    INT ImageIndex = I_IMAGENONE;
+    HICON hIcon;
+
+    hIcon = (HICON)LoadImage(g_WinObj.hInstance,
+        MAKEINTRESOURCE(ResourceImageId),
+        IMAGE_ICON,
+        16,
+        16,
+        LR_DEFAULTCOLOR);
+
+    if (hIcon) {
+        ImageIndex = ImageList_ReplaceIcon(ImageList, -1, hIcon);
+        DestroyIcon(hIcon);
+    }
+
+    return ImageIndex;
+}
+
+/*
 * ObManagerLoadImageList
 *
 * Purpose:
@@ -201,34 +232,27 @@ HIMAGELIST ObManagerLoadImageList(
 )
 {
     UINT       i;
-    HIMAGELIST list;
-    HICON      hIcon;
+    HIMAGELIST ImageList;
 
-    list = ImageList_Create(
-        16, 
-        16, 
+    ImageList = ImageList_Create(
+        16,
+        16,
         ILC_COLOR32 | ILC_MASK,
-        TYPE_LAST, 
+        TYPE_LAST,
         8);
 
-    if (list) {
-        for (i = TYPE_FIRST; i <= TYPE_LAST; i++) { //must include ObjectTypeUnknown
-               
-            hIcon = (HICON)LoadImage(g_WinObj.hInstance, 
-                MAKEINTRESOURCE(g_ObjectTypes[i].ResourceImageId),
-                IMAGE_ICON, 
-                16, 
-                16, 
-                LR_DEFAULTCOLOR);
+    if (ImageList) {
 
-            if (hIcon) {
-                g_ObjectTypes[i].ImageIndex = ImageList_ReplaceIcon(list, -1, hIcon);
-                DestroyIcon(hIcon);
-            }
-            else {
-                g_ObjectTypes[i].ImageIndex = I_IMAGENONE;
-            }
+        for (i = TYPE_FIRST; i < TYPE_LAST; i++) {
+
+            g_ObjectTypes[i].ImageIndex = ObManagerLoadImageForType(ImageList,
+                g_ObjectTypes[i].ResourceImageId);
+
         }
+
+        g_TypeUnknown.ImageIndex = ObManagerLoadImageForType(ImageList,
+            g_TypeUnknown.ResourceImageId);
+
     }
-    return list;
+    return ImageList;
 }
